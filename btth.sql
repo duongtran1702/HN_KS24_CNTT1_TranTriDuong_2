@@ -1,5 +1,3 @@
-drop database if exists db_btth;
-
 create database db_btth;
 
 use db_btth;
@@ -161,6 +159,7 @@ from
     join rooms r on r.room_id = b.room_id
 group by
     r.room_type;
+
 -- Tìm những khách đã đặt phòng từ 2 lần trở lên
 select
     g.guest_id,
@@ -184,6 +183,18 @@ from
     join rooms r on r.room_id = b.room_id
 group by
     r.room_type
-order by
-    booking_count desc
-limit 1;
+having
+    count(b.booking_id) = (
+        select
+            max(cnt)
+        from
+            (
+                select
+                    count(*) as cnt
+                from
+                    bookings b2
+                    join rooms r2 on r2.room_id = b2.room_id
+                group by
+                    r2.room_type
+            ) t
+    );
